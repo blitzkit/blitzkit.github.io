@@ -1,0 +1,27 @@
+name: Deploy
+
+on:
+  repository_dispatch:
+    types: [deploy-pages]
+
+permissions:
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up pages
+        uses: actions/configure-pages@v6
+
+      - name: Download artifact
+        run: |
+          curl -L -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          -o artifact.tar.gz "${{ github.event.client_payload.artifact_url }}"
+
+      - name: Deploy
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages
