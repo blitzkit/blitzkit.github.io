@@ -2,26 +2,35 @@ name: Deploy
 
 on:
   repository_dispatch:
-    types: [deploy-pages]
-
-permissions:
-  pages: write
-  id-token: write
+    types:
+      - deploy-pages
 
 jobs:
   deploy:
+    name: Deploy
+
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Set up GitHub Pages
-        uses: actions/configure-pages@v6
-
       - name: Download artifact
+        env:
+          TOKEN: ${{ secrets.GH_NODE_DEPLOY_TOKEN }}
         run: |
-          curl -L -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          -o artifact.tar.gz "${{ github.event.client_payload.artifact_url }}"
+          REPO="${{ github.event.client_payload.source_repo }}"
+          ARTIFACT="${{ github.event.client_payload.artifact_id }}"
+      
+          curl -L \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$REPO/actions/artifacts/$ARTIFACT/zip" \
+            -o artifact.zip
+      
+          unzip artifact.zip -d site
 
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+      
       - name: Deploy
         uses: actions/deploy-pages@v4
-        with:
-          artifact_name: github-pages
