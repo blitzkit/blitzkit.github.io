@@ -17,6 +17,14 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+      - name: Verify artifact
+        env:
+          TOKEN: ${{ secrets.GH_NODE_DEPLOY_TOKEN }}
+        run: |
+          curl \
+            -H "Authorization: Bearer $TOKEN" \
+            "https://api.github.com/repos/$REPO/actions/artifacts/$ARTIFACT"
+
       - name: Download artifact
         env:
           TOKEN: ${{ secrets.GH_NODE_DEPLOY_TOKEN }}
