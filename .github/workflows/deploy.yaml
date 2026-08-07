@@ -17,14 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Verify artifact
-        env:
-          TOKEN: ${{ secrets.GH_NODE_DEPLOY_TOKEN }}
-        run: |
-          curl \
-            -H "Authorization: Bearer $TOKEN" \
-            "https://api.github.com/repos/$REPO/actions/artifacts/$ARTIFACT"
-
       - name: Download artifact
         env:
           TOKEN: ${{ secrets.GH_NODE_DEPLOY_TOKEN }}
@@ -39,12 +31,6 @@ jobs:
             -o artifact.zip
       
           unzip artifact.zip -d site
-
-      - name: Inspect files
-        run: |
-          pwd
-          ls -lah
-          find site
 
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v5
